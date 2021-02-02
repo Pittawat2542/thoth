@@ -136,7 +136,7 @@ def show_labeling_tool(df: pd.DataFrame):
 
 def proceed_next(df: pd.DataFrame, frame: LabelFrame):
     global current_index, end_index
-    if current_index + 1 == end_index:
+    if current_index > end_index:
         messagebox.showinfo(message="You've reached the end of your settings. Program will close after this message.")
         exit(0)
 
@@ -190,7 +190,7 @@ def read_settings_from_file():
             end_index = int(contents[2].split("=")[1].split("\n")[0])
             current_index = int(contents[3].split("=")[1].split("\n")[0])
 
-            if current_index + 1 == end_index:
+            if current_index > end_index:
                 messagebox.showinfo(message="Please edit end_index or start_index in setting.conf to continue.")
                 exit(0)
 
