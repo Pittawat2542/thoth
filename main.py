@@ -15,6 +15,8 @@ end_index = 0
 current_index = 0
 labels = []
 is_show_labeling_tool = False
+labelling_frame = None
+is_init = False
 
 window = Tk()
 window.title("Thoth")
@@ -88,48 +90,54 @@ def setting_frame(df: pd.DataFrame):
 
 
 def show_labeling_tool(df: pd.DataFrame):
-    global selected_column, start_index, end_index, current_index, labels
+    global selected_column, start_index, end_index, current_index, labels, labelling_frame, remaining_label, text_label, is_init
     try:
-        frame = LabelFrame(window, padx=24, pady=24)
+        if labelling_frame is None:
+            labelling_frame = LabelFrame(window, padx=24, pady=24)
 
         col_idx = df.columns.get_loc(LABEL_COLUMN_NAME)
         current_label = df.iloc[current_index, col_idx]
         try:
             if not np.isnan(current_label):
-                proceed_next(df, frame)
+                proceed_next(df, labelling_frame)
         except TypeError:
-            proceed_next(df, frame)
+            proceed_next(df, labelling_frame)
 
         column_index = df.columns.get_loc(selected_column)
         main_text = df.iloc[current_index, column_index]
 
-        remaining_label = create_label(frame, f"Remaining: {current_index - start_index}/{end_index - start_index}")
-        text_label = create_label(frame, main_text, wraplength=500)
+        if not is_init:
+            remaining_label = create_label(labelling_frame, f"Remaining: {current_index - start_index}/{end_index - start_index}")
+            text_label = create_label(labelling_frame, main_text, wraplength=500)
 
-        remaining_label.grid(row=0, column=1, padx=10, pady=5, sticky="E")
-        text_label.grid(row=1, column=0, columnspan=2, padx=10, pady=5)
+            remaining_label.grid(row=0, column=1, padx=10, pady=5, sticky="E")
+            text_label.grid(row=1, column=0, columnspan=2, padx=10, pady=5)
 
-        if len(re.split("https?:\/\/", main_text)) > 1:
-            text_label.config(fg="skyblue", cursor="hand2")
-            font = Font(text_label, text_label.cget("font"))
-            font.configure(underline=True)
-            text_label.configure(font=font)
-            text_label.bind("<Button-1>",
-                            lambda e: webbrowser.open_new("http://" + re.split("https?:\/\/", main_text)[1]))
+            if len(re.split("https?:\/\/", main_text)) > 1:
+                text_label.config(fg="skyblue", cursor="hand2")
+                font = Font(text_label, text_label.cget("font"))
+                font.configure(underline=True)
+                text_label.configure(font=font)
+                text_label.bind("<Button-1>",
+                                lambda e: webbrowser.open_new("http://" + re.split("https?:\/\/", main_text)[1]))
 
-        def set_label_index_choice(label):
-            col_idx = df.columns.get_loc(LABEL_COLUMN_NAME)
-            df.iloc[current_index, col_idx] = label
-            proceed_next(df, frame)
+            def set_label_index_choice(label):
+                col_idx = df.columns.get_loc(LABEL_COLUMN_NAME)
+                df.iloc[current_index, col_idx] = label
+                proceed_next(df, labelling_frame)
 
-        for index, label in enumerate(labels):
-            Button(frame, text=label, padx=20, pady=30, command=lambda label=label: set_label_index_choice(label)).grid(
-                row=(int(index / 3) + 2), column=int(index % 3), sticky='nesw')
+            for index, label in enumerate(labels):
+                Button(labelling_frame, text=label, padx=20, pady=30, command=lambda label=label: set_label_index_choice(label)).grid(
+                    row=(int(index / 3) + 2), column=int(index % 3), sticky='nesw')
 
-        frame.place(relx=0.5, rely=0.7, anchor=CENTER)
+            labelling_frame.place(relx=0.5, rely=0.7, anchor=CENTER)
+        else:
+            remaining_label.config(text=f"Remaining: {current_index - start_index}/{end_index - start_index}")
+            text_label.config(text=main_text)
 
         global is_show_labeling_tool
         is_show_labeling_tool = True
+        is_init = True
     except KeyError:
         pass
 
@@ -141,8 +149,6 @@ def proceed_next(df: pd.DataFrame, frame: LabelFrame):
         exit(0)
 
     current_index += 1
-    frame.grid_forget()
-    frame.destroy()
 
     col_idx = df.columns.get_loc(LABEL_COLUMN_NAME)
     current_label = df.iloc[current_index, col_idx]
