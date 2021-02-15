@@ -14,7 +14,7 @@ Then simply use `pip` to install all required dependencies from `requirements.tx
 pip install -r requirements.txt
 ```
 
-Next is to create file called `labels.txt`. In this file, it contains the label by having each label separated by new line.
+Next is to create file called `labels.txt` in the same folder as the `main.py`. In this file, it contains the label by having each label separated by new line.
 
 
 ## Usage
