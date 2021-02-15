@@ -19,7 +19,7 @@ Next is to create file called `labels.txt`. In this file, it contains the label 
 
 ## Usage
 
-To start the program, simply run `main.py`.
+To start the program, simply run `main.py`. When you prompt to select file, select the `.csv` file of your dataset.
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
